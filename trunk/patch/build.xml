@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<project name="StackTracePatch" default="build" basedir=".">
+  <property file="build.properties"/>
+
+  <path id="project.class.path">
+    <pathelement location="${src.dir}"/>
+    <pathelement location="${gwt.sdk}/gwt-user.jar"/>
+    <fileset dir="${gwt.sdk}" includes="gwt-dev*.jar"/>
+  </path>
+
+  <target name="javac" description="Compile java source to bytecode">
+    <mkdir dir="${build.dir}"/>
+    <mkdir dir="${build.dir}/classes"/>
+    <javac srcdir="${src.dir}" includes="**" encoding="utf-8"
+        destdir="${build.dir}/classes"
+        source="1.5" target="1.5" nowarn="true"
+        debug="true" debuglevel="lines,vars,source">
+      <classpath refid="project.class.path"/>
+    </javac>
+  </target>
+
+  <target name="clean" description="Cleans this project">
+    <delete dir="${build.dir}" failonerror="false" />
+  </target>
+
+  <target name="jar" depends="javac"
+          description="Builds a JAR file containing the stack trace patch to GWT">
+    <tstamp prefix="timestamp"/>
+    <jar destfile="${build.dir}/gwt-2.5.0-stacktrace_patch-${timestamp.DSTAMP}_${timestamp.TSTAMP}.jar">
+      <!-- Include the patched compiled .class files -->
+      <fileset dir="${build.dir}/classes"
+               includes="com/google/**"/>
+      <!-- Include the new and patched .gwt.xml files from the source directory -->
+      <fileset dir="${src.dir}"
+               includes="com/google/**/*.gwt.xml"/>
+      <!-- Include the source code for files in all client/ packages -->
+      <fileset dir="${src.dir}"
+               includes="com/google/**/client/**"/>
+    </jar>
+  </target>
+
+  <target name="build" description="Builds the patch"
+      depends="clean,jar">
+  </target>
+
+</project>

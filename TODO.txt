@@ -1,0 +1,2 @@
+- [done] patch JAR not being used in compilation
+- [done] reference error not being triggered

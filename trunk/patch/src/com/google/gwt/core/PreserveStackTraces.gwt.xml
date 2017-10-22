@@ -1,0 +1,61 @@
+<!--
+  Enables stack traces that preserve original Java line numbers in production.
+  This is currently achieved by using SourceMaps for Chrome and stack emulation
+  with line numbers for all other browsers.  In the latter case, there is a
+  nontrivial performance penalty and a significant increase in compiled
+  JavaScript size, but that is the only way to do it for browsers that don't
+  provide stack traces with column numbers (all but Chrome, as of May 27, 2013)
+-->
+<module>
+  <inherits name="com.google.gwt.core.CoreWithUserAgent"/>
+  <!--
+    Define a new property that tells us whether column numbers are available in
+    the stack traces provided by the browser and whether the browser provides
+    an Error.captureStackTrace function.  This property determines
+    whether perfect stack traces can be reconstructed without stack emulation.
+   -->
+  <define-property name="chromeWithColNumbers" values="true,false"/>
+  <property-provider name="chromeWithColNumbers">
+    <![CDATA[
+      if (Error && Error.captureStackTrace) {
+		    try {
+          null.a();  // will throw an exception
+        } catch (e) {
+          if (e.stack) {
+            // split the stack trace into constituent elements
+            var stackLines = e.stack.split("\n");
+            if (stackLines && stackLines.length > 1 && /:\d+:\d+\)?\s*$/.test(stackLines[1])) {
+              return true;
+            }
+          }
+        }
+      }
+      return false;
+		]]>
+	</property-provider>
+  <!--
+    This property is only for webkit-based browsers.  It basically serves
+    to differentiate between Chrome and Safari.  As of May 27, 2013,
+    no browser other than Chrome provides the column numbers.
+   -->
+  <set-property name="chromeWithColNumbers" value="false">
+    <none>
+      <when-property-is name="user.agent" value="safari"/>
+    </none>
+  </set-property>
+
+  <!--
+    Source maps can be used to reconstruct stack traces with original Java
+    line numbers when the browser provides stack traces with column numbers
+  -->
+  <set-property name="compiler.useSourceMaps" value="true">
+    <when-property-is name="chromeWithColNumbers" value="true"/>
+  </set-property>
+
+  <!-- Enable stack emulation with line numbers for all other browsers -->
+  <set-property name="compiler.stackMode" value="emulated">
+    <when-property-is name="chromeWithColNumbers" value="false"/>
+  </set-property>
+  <set-configuration-property name="compiler.emulatedStack.recordLineNumbers" value="true"/>
+
+</module>
