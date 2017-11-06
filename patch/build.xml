@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<project name="StackTracePatch" default="build" basedir=".">
+  <property file="build.properties"/>
+
+  <!-- Load the Ant-Contrib tasks; specifically, we will be using the "for" task (see http://ant-contrib.sourceforge.net/tasks/index.html)-->
+  <taskdef resource="net/sf/antcontrib/antlib.xml"/>
+
+  <path id="project.class.path">
+    <pathelement location="${src.dir}"/>
+    <pathelement location="${gwt.sdk}/gwt-user.jar"/>
+    <fileset dir="${gwt.sdk}" includes="gwt-dev*.jar"/>
+  </path>
+
+  <target name="extract-gwt-distro" description="Extract the GWT SDK jars that we'll be patching">
+    <mkdir dir="${build.gwt-distro.dir}"/>
+    <for param="jar.name" list="${gwt.sdk.jars}">
+      <sequential>
+        <echo>${gwt.sdk}/@{jar.name}.jar</echo>
+        <unjar src="${gwt.sdk}/@{jar.name}.jar" dest="${build.gwt-distro.dir}/@{jar.name}"/>
+      </sequential>
+    </for>
+  </target>
+
+  <target name="test-scripting" description="TEMP: figuring out how to use the script task">
+    <script language="javascript">
+      <![CDATA[
+          print("gwt.sdk = " + StackTracePatch.getProperty("gwt.sdk"));
+          StackTracePatch.setProperty("patch-gwt-distro.js.state", JSON.stringify({fileMap: {a: [1,2,3], b: [4,5,6]}}));
+          print("patch-gwt-distro.js.state = " + StackTracePatch.getProperty("patch-gwt-distro.js.state"));
+        ]]>
+    </script>
+    <var name="patch-gwt-distro.js.method" value="printFileMap"/>
+    <script language="javascript" src="patch-gwt-distro.js"/>
+    <echo message="patch-gwt-distro.js.state = ${patch-gwt-distro.js.state}"/>
+    <var name="patch-gwt-distro.js.state" unset="true"/>
+  </target>
+
+  <target name="patch-gwt-distro" description="Copy our patch files to the exploded GWT jars">
+    <!--
+    TODO: make this run faster: the nested for loops are way too slow;
+      ideas:
+        - combine the filesets and use only 1 loop
+        - convert the JS code to Java (can pass ant props to the java process as program args)
+          - even better: just rewrite this entire target in Java (will avoid invoking a script for every file pair)
+     -->
+    <for param="gwt.file">
+      <path>
+        <fileset dir="${build.gwt-distro.dir}" includes="**/*.java,**/*.gwt.xml"/>
+      </path>
+      <sequential>
+        <local name="gwt.file"/>
+        <property name="gwt.file" value="@{gwt.file}"/>
+        <echo message="${gwt.file}"/>
+        <local name="gwt.file.name"/>
+        <basename property="gwt.file.name" file="@{gwt.file}"/>
+        <for param="src.file">
+          <!-- Iterate over our src files and find the corresponding files in the GWT distro -->
+          <path>
+            <fileset dir="${src.dir}" includes="**/*.java,**/*.gwt.xml"/>
+          </path>
+          <sequential>
+            <local name="src.file"/>
+            <property name="src.file" value="@{src.file}"/>
+            <echo message="  ${src.file}"/>
+            <!-- use the "local" task to make the property mutable within the local scope -->
+            <local name="src.file.name"/>
+            <basename property="src.file.name" file="@{src.file}"/>
+            <!-- Invoke our JS to increment the match counter and save the file mapping -->
+            <var name="patch-gwt-distro.js.method" value="compareFilenames"/>
+            <script language="javascript" src="patch-gwt-distro.js"/>
+          </sequential>
+        </for>
+      </sequential>
+    </for>
+    <!-- Invoke our JS to print the file mapping -->
+    <var name="patch-gwt-distro.js.method" value="printFileMap"/>
+    <script language="javascript" src="patch-gwt-distro.js"/>
+  </target>
+
+  <target name="javac" description="Compile java source to bytecode">
+    <mkdir dir="${build.dir}"/>
+    <mkdir dir="${build.dir}/classes"/>
+    <javac srcdir="${src.dir}" includes="**" encoding="utf-8"
+        destdir="${build.dir}/classes"
+        source="1.5" target="1.5" nowarn="true"
+        debug="true" debuglevel="lines,vars,source">
+      <classpath refid="project.class.path"/>
+    </javac>
+  </target>
+
+  <target name="clean" description="Deletes the build output">
+    <delete dir="${build.dir}" failonerror="false" />
+  </target>
+
+  <target name="jar" depends="javac"
+          description="Builds a JAR file containing the stack trace patch to GWT">
+    <tstamp prefix="timestamp"/>
+    <jar destfile="${build.dir}/gwt-2.5.0-stacktrace_patch-${timestamp.DSTAMP}_${timestamp.TSTAMP}.jar">
+      <!-- Include the patched compiled .class files -->
+      <fileset dir="${build.dir}/classes"
+               includes="com/google/**"/>
+      <!-- Include the new and patched .gwt.xml files from the source directory -->
+      <fileset dir="${src.dir}"
+               includes="com/google/**/*.gwt.xml"/>
+      <!-- Include the source code for files in all client/ packages -->
+      <fileset dir="${src.dir}"
+               includes="com/google/**/client/**"/>
+    </jar>
+  </target>
+
+  <target name="build" description="Builds the patch"
+      depends="clean,jar">
+  </target>
+
+</project>

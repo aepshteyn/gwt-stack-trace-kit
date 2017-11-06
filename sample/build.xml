@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<project name="StackTraceDemo" default="war" basedir=".">
+  <property file="build.properties"/>
+  <property file="${deps.stacktracedeobfuscator}/build.properties" prefix="stacktracedeobfuscator" prefixValues="true"/>
+  <echo>
+    Properties imported from stacktracedeobfuscator/build.properties:
+    basedir=${stacktracedeobfuscator.basedir}
+    project.name=${stacktracedeobfuscator.project.name}
+    project.version=${stacktracedeobfuscator.project.version}
+    build.mainjar.file.rel=${stacktracedeobfuscator.build.mainjar.file.rel}
+    build.dir=${stacktracedeobfuscator.build.dir}
+    build.jarfile.prefix=${stacktracedeobfuscator.build.jarfile.prefix}
+    build.jarfile.main=${stacktracedeobfuscator.build.jarfile.main}
+  </echo>
+
+  <path id="project.class.path">
+    <!-- TODO: why were we putting this location on the cp? shouldn't it be under build.dir? -->
+    <!--<pathelement location="war/WEB-INF/classes"/>-->
+    <fileset dir="${lib.dir}" includes="**/*.jar"/>
+    <pathelement location="${gwt.sdk}/gwt-user.jar"/>
+    <fileset file="${deps.stacktracedeobfuscator}/${stacktracedeobfuscator.build.mainjar.file.rel}"/>
+    <fileset dir="${gwt.sdk}" includes="gwt-dev*.jar"/>
+    <!-- Add any additional non-server libs (such as JUnit) -->
+    <!--<fileset dir="${src.war.dir}/WEB-INF/lib" includes="**/*.jar"/>-->
+  </path>
+
+  <target name="copy" description="Copy war directory to build output">
+    <mkdir dir="${build.war.dir}"/>
+    <copy todir="${build.war.dir}">
+      <fileset dir="${src.war.dir}"/>
+    </copy>
+  </target>
+
+  <target name="libs" depends="copy" description="Copy required libs to WEB-INF/lib">
+    <mkdir dir="${build.war.dir}/WEB-INF/lib"/>
+
+    <copy todir="${build.war.dir}/WEB-INF/lib" failonerror="true">
+      <fileset dir="${gwt.sdk}" includes="gwt-servlet*.jar"/>
+      <fileset dir="${lib.dir}" includes="**/*.jar"/>
+      <fileset file="${deps.stacktracedeobfuscator}/${stacktracedeobfuscator.build.mainjar.file.rel}"/>
+    </copy>
+    <!-- Add any additional server libs that need to be copied here -->
+  </target>
+
+  <target name="javac" depends="libs" description="Compile java source to bytecode">
+    <mkdir dir="${build.war.dir}/WEB-INF/classes"/>
+    <javac srcdir="${src.dir}" includes="**" encoding="utf-8"
+        destdir="${build.war.dir}/WEB-INF/classes"
+        source="1.5" target="1.5" nowarn="true"
+        debug="true" debuglevel="lines,vars,source">
+      <classpath refid="project.class.path"/>
+    </javac>
+    <!-- TODO: why was the following copy cmd necessary?  Doesn't the above javac command already output to this dir? -->
+    <!--<copy todir="war/WEB-INF/classes">-->
+      <!--<fileset dir="src" excludes="**/*.java"/>-->
+    <!--</copy>-->
+  </target>
+
+  <target name="gwtc" depends="clean, javac" description="GWT compile (production mode)">
+    <java failonerror="true" fork="true" classname="com.google.gwt.dev.Compiler">
+      <classpath>
+        <pathelement location="${src.dir}"/>
+        <path refid="project.class.path"/>
+        <pathelement location="${gwt.sdk}/validation-api-1.0.0.GA.jar" />
+        <pathelement location="${gwt.sdk}/validation-api-1.0.0.GA-sources.jar" />
+      </classpath>
+      <!-- add jvmarg -Xss16M or similar if you see a StackOverflowError -->
+      <jvmarg value="-Xmx256M"/>
+      <jvmarg line="${jvm.args}"/>
+      <arg line="-war ${build.war.dir}"/>
+      <!-- Additional arguments like -style PRETTY or -logLevel DEBUG -->
+      <arg line="${gwt.args}"/>
+      <arg value="${gwt.module}"/>
+    </java>
+  </target>
+
+  <target name="devmode" depends="javac" description="Run development mode">
+    <java failonerror="true" fork="true" classname="com.google.gwt.dev.DevMode">
+      <classpath>
+        <pathelement location="${src.dir}"/>
+        <path refid="project.class.path"/>
+        <pathelement location="${gwt.sdk}/validation-api-1.0.0.GA.jar" />
+        <pathelement location="${gwt.sdk}/validation-api-1.0.0.GA-sources.jar" />
+      </classpath>
+      <jvmarg value="-Xmx256M"/>
+      <jvmarg line="${jvm.args}"/>
+      <arg value="-startupUrl"/>
+      <arg value="StackTraceDemo.html"/>
+      <arg line="-war war"/>
+      <!-- Additional arguments like -style PRETTY or -logLevel DEBUG -->
+      <arg line="${gwt.args}"/>
+      <arg value="${gwt.module}"/>
+    </java>
+  </target>
+
+  <target name="build" depends="gwtc" description="Build this project" />
+
+  <target name="war" depends="build" description="Create a war file">
+    <war destfile="${build.dir}/${build.war.file}" basedir="${build.war.dir}"/>
+  </target>
+
+  <target name="clean" description="Deletes the build output">
+    <delete dir="${build.dir}" failonerror="true" />
+  </target>
+
+</project>

@@ -1,0 +1,3 @@
+# Module stdemo
+# RPC service class, partial path of RPC policy file
+solutions.trsoftware.gwt.stacktrace.client.StackTraceDeobfuscatorService, 0CE81AA080B342A854421A776CDFC687.gwt.rpc

@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app>
+
+  <!-- Default page to serve -->
+  <welcome-file-list>
+    <welcome-file>StackTraceDemo.html</welcome-file>
+  </welcome-file-list>
+
+  <servlet>
+    <servlet-name>StackTraceDeobfuscatorServlet</servlet-name>
+    <servlet-class>
+      solutions.trsoftware.gwt.stacktrace.server.StackTraceDeobfuscatorServlet
+    </servlet-class>
+  </servlet>
+  <servlet-mapping>
+    <servlet-name>StackTraceDeobfuscatorServlet</servlet-name>
+    <url-pattern>/stdemo/StackTraceDeobfuscatorServlet</url-pattern>
+  </servlet-mapping>
+
+</web-app>

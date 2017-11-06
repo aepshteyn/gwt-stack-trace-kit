@@ -1,0 +1,17 @@
+<component name="ArtifactManager">
+  <artifact type="exploded-war" name="sample:Web exploded">
+    <output-path>$PROJECT_DIR$/out/artifacts/sample_Web_exploded</output-path>
+    <root id="root">
+      <element id="javaee-facet-resources" facet="sample/web/Web" />
+      <element id="directory" name="WEB-INF">
+        <element id="directory" name="classes">
+          <element id="javaee-facet-classes" facet="sample/web/Web" />
+          <element id="module-output" name="StackTraceDeobfuscator" />
+          <element id="module-output" name="patch" />
+        </element>
+        <element id="directory" name="lib" />
+      </element>
+      <element id="gwt-compiler-output" facet="sample/gwt/GWT" />
+    </root>
+  </artifact>
+</component>

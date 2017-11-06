@@ -1,0 +1,14 @@
+<!-- Copyright 2013 Alex Epshteyn (alex@typeracer.com) -->
+
+<module>
+  <inherits name="com.google.gwt.user.User"/>
+  <inherits name="solutions.trsoftware.gwt.stacktrace.PreserveStackTraces"/>
+
+  <!-- If you want to only get accurate stack traces in Chrome (with no overhead), uncomment the following lines -->
+  <!--<set-property name="compiler.stackMode" value="native"/>-->
+  <!--<set-property name="compiler.useSourceMaps" value="true">-->
+    <!--<when-property-is name="user.agent" value="safari"/>-->
+  <!--</set-property>-->
+  <!--<set-property name="chromeWithColNumbers" value="false"/>-->
+
+</module>

@@ -1,0 +1,2 @@
+serviceClass: solutions.trsoftware.gwt.stacktrace.client.StackTraceDeobfuscatorService
+path: 0CE81AA080B342A854421A776CDFC687.gwt.rpc
