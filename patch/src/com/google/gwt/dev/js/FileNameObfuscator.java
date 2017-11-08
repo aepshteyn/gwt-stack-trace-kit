@@ -1,4 +1,7 @@
+// GWT jar: gwt-dev
+
 package com.google.gwt.dev.js;
+
 
 import com.google.gwt.core.linker.SymbolMapsLinker;
 import com.google.gwt.dev.jjs.SourceInfo;

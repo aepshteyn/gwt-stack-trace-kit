@@ -1,4 +1,7 @@
+// GWT jar: gwt-dev
+
 package com.google.gwt.dev.util.collect;
+
 
 /**
  * Counts occurrences of items, up to Integer.MAX_VALUE. This data structure
@@ -6,7 +9,7 @@ package com.google.gwt.dev.util.collect;
  * those keys by frequency.  Example:
  * <pre>
  * Map&lt;T, KeyCounter&lt;T&gt;&gt; counterMap;
- * // init counterMap (use LinkedHashMap for stable sorting).
+ * // init counterMap (use LinkedHashMap for stable sorting)
  * ...
  * // count the items
  * for (T x : someList) {

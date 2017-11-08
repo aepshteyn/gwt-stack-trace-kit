@@ -1,6 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="AntConfiguration">
-    <buildFile url="file://$PROJECT_DIR$/patch/build.xml" />
+    <buildFile url="file://$PROJECT_DIR$/patch/build.xml">
+      <additionalClassPath>
+        <entry path="file://$PROGRAMMING_LIBS_DIR$/ant-contrib/ant-contrib-1.0b3.jar" />
+      </additionalClassPath>
+    </buildFile>
   </component>
 </project>

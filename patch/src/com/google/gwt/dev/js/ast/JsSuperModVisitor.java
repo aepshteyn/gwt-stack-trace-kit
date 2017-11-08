@@ -1,3 +1,5 @@
+// GWT jar: gwt-dev
+
 /*
  * Copyright 2008 Google Inc.
  * 

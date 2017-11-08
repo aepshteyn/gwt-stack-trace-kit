@@ -1,3 +1,5 @@
+// GWT jar: gwt-user
+
 /*
  * Copyright 2011 Google Inc.
  *
