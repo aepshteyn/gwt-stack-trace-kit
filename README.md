@@ -10,8 +10,8 @@ Patches [GWT](http://www.gwtproject.org/) 2.5.0 to provide perfect Java stack tr
 
 ### Getting started
 
-1. Clone this project with git
-2. Add [gwt-2.5.0-stacktrace_patch-20171022_1916.jar](https://github.com/aepshteyn/gwt-stack-trace-kit/blob/master/patch/build/gwt-2.5.0-stacktrace_patch-20171022_1916.jar) to your GWT compile classpath
+1. Download [`gwt-2.5.0-StackTracePatch.zip`](https://github.com/aepshteyn/gwt-stack-trace-kit/releases/download/v1.0/gwt-2.5.0-StackTracePatch.zip)
+2. Extract it on your machine, and use it as your new GWT SDK location
 3. Take a look at the provided [sample application](https://github.com/aepshteyn/gwt-stack-trace-kit/tree/master/sample)
 
 ### Donate
