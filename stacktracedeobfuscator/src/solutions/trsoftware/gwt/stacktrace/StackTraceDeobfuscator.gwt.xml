@@ -2,7 +2,7 @@
 
 <module>
   <inherits name="com.google.gwt.user.User"/>
-  <inherits name="solutions.trsoftware.gwt.stacktrace.PreserveStackTraces"/>
+  <inherits name="com.google.gwt.core.PreserveStackTraces"/>
 
   <!-- If you want to only get accurate stack traces in Chrome (with no overhead), uncomment the following lines -->
   <!--<set-property name="compiler.stackMode" value="native"/>-->

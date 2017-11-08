@@ -10,7 +10,7 @@
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="library" name="guava-15.0" level="application" />
-    <orderEntry type="library" name="GWT 2.5.0" level="application" />
+    <orderEntry type="library" name="gwt-2.5.0-StackTracePatch" level="application" />
     <orderEntry type="module" module-name="TR Commons" />
   </component>
 </module>

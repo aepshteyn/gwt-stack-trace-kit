@@ -4,13 +4,11 @@ import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
 import solutions.trsoftware.commons.server.io.FileSet;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
+import java.io.*;
 import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
 
@@ -46,7 +44,7 @@ public class PatchGwtDistro {
     for (File file : srcFileSet) {
       srcFilesByName.put(getFilenameWithoutExtension(file), file);
     }
-    List<FileCopyTask> copyTasks = new ArrayList<>();
+    Patch patch = new Patch();
     boolean allSrcFilesMapped = true;
     for (String srcFileName : srcFilesByName.keySet()) {
       List<File> srcFiles = new ArrayList<>(srcFilesByName.get(srcFileName));
@@ -62,18 +60,19 @@ public class PatchGwtDistro {
           switch (gwtFileExt) {
             case ".java":
               assert srcFileExt.equals(".java");
-              copyTasks.add(new FileCopyTask(srcFile, gwtFile));
+              patch.copy(srcFile, gwtFile);
               break;
             case ".class":
               assert srcFileExt.equals(".java");
+              // TODO: cont here: delete all the inner classes from gwt and copy all the inner classes from patch
+              File gwtFileParentDir = gwtFile.getParentFile();
+              patch.delete(findInnerClasses(srcFileName, gwtFileParentDir));
               // copy the compiled version of our src file
-              File srcClassFile = getSrcClassFile(srcFileName, srcFile);
-              assert srcClassFile.exists() : srcClassFile.toString();
-              copyTasks.add(new FileCopyTask(srcClassFile, gwtFile));
+              patch.copy(getSrcClassFiles(srcFileName, srcFile), gwtFileParentDir);
               break;
             default:
               assert gwtFileExt.equals(".gwt.xml") : gwtFile;
-              copyTasks.add(new FileCopyTask(srcFile, gwtFile));
+              patch.copy(srcFile, gwtFile);
               break;
           }
           String gwtFileRelativePath = gwtFile.getPath().substring(gwtJarsRoot.getPath().length());
@@ -87,9 +86,9 @@ public class PatchGwtDistro {
           String targetPath = gwtJarsRoot.getPath() + File.separator + gwtJar + getRelativePath(srcFile, patchSrcRoot);
           System.out.println("  -> " + targetPath + File.separator);
           File targetFile = new File(targetPath, srcFile.getName());
-          copyTasks.add(new FileCopyTask(srcFile, targetFile));
+          patch.copy(srcFile, targetFile);
           if (srcFileExt.equals(".java")) {
-            copyTasks.add(new FileCopyTask(getSrcClassFile(srcFileName, srcFile), new File(targetPath, srcFileName + ".class")));
+            patch.copy(getSrcClassFiles(srcFileName, srcFile), new File(targetPath));
           }
         }
         else {
@@ -101,12 +100,14 @@ public class PatchGwtDistro {
     }
     assert allSrcFilesMapped : "Copy tasks will not be run, since not all src files have been mapped";
     System.out.println("--------------------------------------------------------------------------------");
-    System.out.println("Copying files:");
+    System.out.println("Applying patch:");
     System.out.println("--------------------------------------------------------------------------------");
-    for (FileCopyTask copyTask : copyTasks) {
-      System.out.println(copyTask);
-      copyTask.execute();
-    }
+    patch.apply();
+    // TODO: temp
+//    for (FileCopyTask copyTask : copyTasks) {
+//      System.out.println(copyTask);
+//      copyTask.execute();
+//    }
   }
 
   private String getJarMapping(File srcFile) throws IOException {
@@ -125,7 +126,22 @@ public class PatchGwtDistro {
     return new File(patchClassesRoot.getPath() + srcFileRelativePath,  srcFileName + ".class");
   }
 
-  private static String getRelativePath(File file, File baseDir) {
+  /**
+   * Finds the {@code .class} files for the class with the given name in the source compiler output directory.
+   * @return the {@code .class} files of the main class and all its inner classes
+   */
+  private Set<File> getSrcClassFiles(String clsName, File srcFile) {
+    File mainClassFile = getSrcClassFile(clsName, srcFile);
+    Set<File> ret = findInnerClasses(clsName, mainClassFile.getParentFile());
+    ret.add(mainClassFile);
+    return ret;
+  }
+
+  private Set<File> findInnerClasses(String clsName, File dir) {
+    return new FileSet(dir, (dir1, name) -> name.startsWith(clsName + "$"));
+  }
+
+  public static String getRelativePath(File file, File baseDir) {
     return file.getParentFile().getPath().substring(baseDir.getPath().length());
   }
 
@@ -151,15 +167,20 @@ public class PatchGwtDistro {
     new PatchGwtDistro(new File(args[0]), new File(args[1]), new File(args[2])).run();
   }
 
-  public static class FileCopyTask {
+  interface FileTask {
+    void execute() throws IOException;
+  }
+
+  public static class CopyFileTask implements FileTask {
     private File from;
     private File to;
 
-    public FileCopyTask(File from, File to) {
+    public CopyFileTask(File from, File to) {
       this.from = from;
       this.to = to;
     }
 
+    @Override
     public void execute() throws IOException {
       Files.copy(from.toPath(), to.toPath(), REPLACE_EXISTING);
     }
@@ -167,6 +188,55 @@ public class PatchGwtDistro {
     @Override
     public String toString() {
       return "Copy " + from + " -> " + to;
+    }
+  }
+
+  public static class DeleteFileTask implements FileTask {
+    private File file;
+
+    public DeleteFileTask(File file) {
+      this.file = file;
+    }
+
+    @Override
+    public void execute() throws IOException {
+      Files.delete(file.toPath());
+    }
+
+    @Override
+    public String toString() {
+      return "Delete " + file;
+    }
+  }
+
+  public static class Patch {
+    private List<FileTask> tasks = new ArrayList<>();
+
+    public void copy(File from, File to) {
+      tasks.add(new CopyFileTask(from, to));
+    }
+
+    public void copy(Set<File> files, File toDir) {
+      for (File file : files) {
+        copy(file, new File(toDir, file.getName()));
+      }
+    }
+
+    public void delete(File file) {
+      tasks.add(new DeleteFileTask(file));
+    }
+
+    public void delete(Set<File> files) {
+      for (File file : files) {
+        delete(file);
+      }
+    }
+
+    public void apply() throws IOException {
+      for (FileTask task : tasks) {
+        System.out.println(task);
+        task.execute();
+      }
     }
   }
 

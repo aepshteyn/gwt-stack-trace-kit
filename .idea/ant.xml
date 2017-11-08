@@ -6,5 +6,6 @@
         <entry path="file://$PROGRAMMING_LIBS_DIR$/ant-contrib/ant-contrib-1.0b3.jar" />
       </additionalClassPath>
     </buildFile>
+    <buildFile url="file://$PROJECT_DIR$/stacktracedeobfuscator/build.xml" />
   </component>
 </project>

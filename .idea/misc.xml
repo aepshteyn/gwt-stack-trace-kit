@@ -110,7 +110,7 @@
     <file type="gwt" url="file://$PROJECT_DIR$/patch/build/gwt-distro/gwt-user/javax/validation/Validation.gwt.xml" />
     <file type="gwt" url="file://$PROJECT_DIR$/patch/build/gwt-distro/gwt-user/org/hibernate/validator/HibernateValidator.gwt.xml" />
     <file type="gwt" url="file://$PROJECT_DIR$/patch/src/com/google/gwt/core/CoreWithUserAgent.gwt.xml" />
-    <file type="gwt" url="file://$PROJECT_DIR$/stacktracedeobfuscator/src/solutions/trsoftware/gwt/stacktrace/PreserveStackTraces.gwt.xml" />
+    <file type="gwt" url="file://$PROJECT_DIR$/patch/src/com/google/gwt/core/PreserveStackTraces.gwt.xml" />
     <file type="web" url="file://$PROJECT_DIR$/patch/build/gwt-distro/gwt-dev/com/google/gwt/dev/etc/tomcat/conf/web.xml" />
     <file type="web" url="file://$PROJECT_DIR$/patch/build/gwt-distro/gwt-dev/com/google/gwt/dev/etc/tomcat/webapps/ROOT/WEB-INF/web.xml" />
     <file type="web" url="file://$PROJECT_DIR$/sample/build/war/WEB-INF/web.xml" />

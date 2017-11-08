@@ -5,6 +5,8 @@
   nontrivial performance penalty and a significant increase in compiled
   JavaScript size, but that is the only way to do it for browsers that don't
   provide stack traces with column numbers (all but Chrome, as of May 27, 2013)
+
+// GWT jar: gwt-user
 -->
 <module>
   <inherits name="com.google.gwt.core.CoreWithUserAgent"/>

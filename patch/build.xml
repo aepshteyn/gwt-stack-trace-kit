@@ -29,28 +29,10 @@
     </for>
   </target>
 
-  <target name="test-scripting" description="TEMP: figuring out how to use the script task">
-    <script language="javascript">
-      <![CDATA[
-          print("gwt.sdk = " + StackTracePatch.getProperty("gwt.sdk"));
-          StackTracePatch.setProperty("patch-gwt-distro.js.state", JSON.stringify({fileMap: {a: [1,2,3], b: [4,5,6]}}));
-          print("patch-gwt-distro.js.state = " + StackTracePatch.getProperty("patch-gwt-distro.js.state"));
-        ]]>
-    </script>
-    <var name="patch-gwt-distro.js.method" value="printFileMap"/>
-    <script language="javascript" src="patch-gwt-distro.js"/>
-    <echo message="patch-gwt-distro.js.state = ${patch-gwt-distro.js.state}"/>
-    <var name="patch-gwt-distro.js.state" unset="true"/>
-  </target>
-
   <target name="patch-gwt-distro"
           description="Copy our patch files to the exploded GWT jars"
           depends="extract-gwt-distro, javac-tools">
-    <!--
-    C:\Users\Alex\Documents\Projects\gwt-stack-trace-kit\patch\build\gwt-distro
-    C:\Users\Alex\Documents\Projects\gwt-stack-trace-kit\patch\src
-    C:\Users\Alex\Documents\Projects\gwt-stack-trace-kit\patch\build\classes
-    -->
+    <!-- Copy our patch files to the exploded jars -->
     <java classname="solutions.trsoftware.gwt.patch.PatchGwtDistro"
           classpathref="tools.class.path"
           fork="true">
@@ -64,8 +46,19 @@
       <arg value="${src.dir}"/>
       <arg value="${build.dir}/classes"/>
     </java>
-    <mkdir dir="${build.gwt-dist.dir}"/>
+    <!-- rebuild the .gwtar files -->
+    <java classname="solutions.trsoftware.gwt.patch.CompileModules"
+          classpathref="tools.class.path"
+          fork="true">
+      <classpath>
+        <pathelement location="${build.dir}/classes"/>
+      </classpath>
+      <jvmarg value="-Xmx256m"/>
+      <jvmarg value="-ea"/>
+      <arg value="${build.gwt-exploded-jars.dir}/gwt-user"/>
+    </java>
     <!-- copy the whole GWT SDK to our build dir -->
+    <mkdir dir="${build.gwt-dist.dir}"/>
     <copy todir="${build.gwt-dist.dir}">
       <fileset dir="${gwt.sdk}"/>
     </copy>
