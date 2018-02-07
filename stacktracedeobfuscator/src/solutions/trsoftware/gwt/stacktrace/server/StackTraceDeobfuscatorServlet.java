@@ -67,6 +67,11 @@ public class StackTraceDeobfuscatorServlet extends RemoteServiceServlet implemen
    *
    * If not overridden, this method returns {@code "WEB-INF/deploy/" + moduleName + "/symbolMaps"}
    *
+   * <b style="color: green">
+   *   TODO: allow specifying the path using {@code init-param} values defined for this servlet in web.xml
+   *   (see {@link javax.servlet.ServletConfig#getInitParameter(String)}
+   * </b>
+   *
    * @param moduleName The name of the GWT module that's making this RPC call, to be used in figuring out
    * where the symbol maps are located on the server. This value can be obtained client-side by calling {@code GWT.getModuleName()}
    *

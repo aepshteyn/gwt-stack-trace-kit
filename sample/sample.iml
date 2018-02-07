@@ -34,6 +34,6 @@
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="module" module-name="StackTraceDeobfuscator" />
     <orderEntry type="module" module-name="patch" />
-    <orderEntry type="library" name="GWT 2.5.0" level="application" />
+    <orderEntry type="library" name="gwt-2.5.0-StackTracePatch" level="application" />
   </component>
 </module>
